@@ -1,6 +1,6 @@
-// Joins 2  tables, ordersby FirstName ascending and creates a new anonymous type with data from both tables.
-// You can in the foreach loop Take(1)
-// You can chain orderby 
+// Joina 2 tabeller, order by FirstName ascending och skapar en anonym typ med data från båda tabellerna.
+// Du kan använda Take(1) i foreach loopen
+// Du kan "chaina" order by.
 
 var query = from user in context.Users
                             join workout in context.Workouts
@@ -29,7 +29,7 @@ var query2 = from workout in context.Workouts
                     Console.WriteLine($"{item.Key} has {item.Count()}");
                 }
                 
-// samma query fast lite annorlunda
+// samma query fast count i själva LINQ syntaxen
 var query2 = from workout in context.Workouts
                              group workout by workout.Type into type
                              orderby type.Key
@@ -55,4 +55,37 @@ var query3 = from workout in context.Workouts
                 foreach (var item in query3)
                 {
                     Console.WriteLine(item.Key.Name + item.Key.Type);
+                }
+
+// Denna query joinar 2 tables, tar med allt för båda typerna.
+// I foreachen så säger vi att skriv ut varje workout namn, sen en till foreachloop som skriver ut alla users
+// som tillhör den workouten i följande format
+Workout1
+  Mikael
+  Mike
+Workout2
+  Mikael
+Workout3
+  Mikael
+  Max
+//
+
+var query4 = from workout in context.Workouts
+                             join user in context.Users
+                             on workout.UserId equals user.UserId
+                             into grouped
+                             select new
+                             {
+                                 Workout = workout,
+                                 User = grouped
+                             };
+
+
+                foreach (var item in query4)
+                {
+                    Console.WriteLine(item.Workout.Name);
+                    foreach (var user in item.User.ToList())
+                    {
+                        Console.WriteLine(user.LastName);
+                    }
                 }
