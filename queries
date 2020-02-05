@@ -1,0 +1,58 @@
+// Joins 2  tables, ordersby FirstName ascending and creates a new anonymous type with data from both tables.
+// You can in the foreach loop Take(1)
+// You can chain orderby 
+
+var query = from user in context.Users
+                            join workout in context.Workouts
+                            on user.UserId equals workout.UserId
+                            orderby user.FirstName ascending, workout.Name ascending
+                            select new
+                            {
+                                user.FirstName,
+                                workout.Name,
+                                workout.Description
+                            };
+                foreach (var item in query.Take(1))
+                {
+                    Console.WriteLine(item);
+                }
+                
+     
+// En group by och order by med count i foreach loopen
+var query2 = from workout in context.Workouts
+                             group workout by workout.Type into type
+                             orderby type.Key
+                             select type;
+
+                foreach (var item in query2)
+                {
+                    Console.WriteLine($"{item.Key} has {item.Count()}");
+                }
+                
+// samma query fast lite annorlunda
+var query2 = from workout in context.Workouts
+                             group workout by workout.Type into type
+                             orderby type.Key
+                             select new { type.Key, Count = type.Count() };
+
+                foreach (var item in query2)
+                {
+                    Console.WriteLine(item);
+                }
+         
+// Query mot workout OCH joina in user. I groupby gör vi en anonym typ där vi säger att den innehåller Type OCH Name som vi
+// sätter värdet från user joinen. Vi tar endast ut alla types som förekommer mer än eller lika med 2 ggr.
+// Eftersom vi selectar type på slutet så betyder det att vi får med allt från den anonyma typen vi skapade i group by
+var query3 = from workout in context.Workouts
+                             join user in context.Users
+                             on workout.UserId equals user.UserId
+                             group workout by new { workout.Type, Name = user.FirstName } into type
+                             where type.Count() >= 2
+                             orderby type.Key.Name ascending
+                             select type;
+                          
+
+                foreach (var item in query3)
+                {
+                    Console.WriteLine(item.Key.Name + item.Key.Type);
+                }
